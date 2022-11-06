@@ -1,6 +1,16 @@
 use std::error::Error;
 use std::io::Write;
 use std::{env, fs, io};
+
+mod scanner;
+use scanner::Scanner;
+
+mod token;
+
+mod token_type;
+
+mod error;
+
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().skip(1).collect();
 
@@ -13,11 +23,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn run_file(arg: &String) -> io::Result<()> {
-    let lines = fs::read_to_string(arg)?;
-    for line in lines.lines() {
-        println!("{line}");
-    }
+fn run_file(arg: &str) -> io::Result<()> {
+    run(fs::read_to_string(arg)?.as_str());
 
     Ok(())
 }
@@ -34,7 +41,7 @@ fn run_prompt() -> io::Result<()> {
                 _ => {
                     // dbg!("{}", input);
                     print!("{input}");
-                    run();
+                    run(input.as_str());
                 }
             },
             Err(err) => print!("{err}"),
@@ -43,4 +50,11 @@ fn run_prompt() -> io::Result<()> {
     Ok(())
 }
 
-fn run() {}
+fn run(source: &str) {
+    let scanner = Scanner::new(source);
+    let tokens = scanner.scan_tokens();
+
+    for token in tokens {
+        println!("{}", token.lexeme);
+    }
+}
