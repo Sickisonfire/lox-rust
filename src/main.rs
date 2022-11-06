@@ -1,6 +1,6 @@
 use std::error::Error;
 use std::io::Write;
-use std::{env, io};
+use std::{env, fs, io};
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().skip(1).collect();
 
@@ -14,6 +14,11 @@ fn main() -> Result<(), Box<dyn Error>> {
 }
 
 fn run_file(arg: &String) -> io::Result<()> {
+    let lines = fs::read_to_string(arg)?;
+    for line in lines.lines() {
+        println!("{line}");
+    }
+
     Ok(())
 }
 fn run_prompt() -> io::Result<()> {
