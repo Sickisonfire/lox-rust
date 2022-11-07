@@ -2,16 +2,30 @@ use std::fmt;
 
 pub type LoxResult<T> = std::result::Result<T, LoxError>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum LoxError {
     SyntaxError { line: usize, message: String },
-}
-
-impl fmt::Display for LoxError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Error text goes here")
-    }
+    IoError(std::io::Error),
 }
 
 impl std::error::Error for LoxError {}
 
+impl fmt::Display for LoxError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            LoxError::SyntaxError { line, message } => {
+                write!(f, "Error at line: {} -> {}", line, message)
+            }
+            LoxError::IoError(e) => {
+                write!(f, "{}", e)
+            }
+        }
+    }
+}
+
+// convert other errors so we can use them with LoxResult
+impl From<std::io::Error> for LoxError {
+    fn from(err: std::io::Error) -> Self {
+        LoxError::IoError(err)
+    }
+}

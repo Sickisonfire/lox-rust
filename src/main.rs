@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::io::Write;
 use std::{env, fs, io};
 
@@ -10,8 +9,9 @@ mod token;
 mod token_type;
 
 mod error;
+use error::*;
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> LoxResult<()> {
     let args: Vec<String> = env::args().skip(1).collect();
 
     match args.len() {
@@ -23,12 +23,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn run_file(arg: &str) -> io::Result<()> {
-    run(fs::read_to_string(arg)?.as_str());
+fn run_file(arg: &str) -> LoxResult<()> {
+    run(fs::read_to_string(arg)?.as_str())?;
 
     Ok(())
 }
-fn run_prompt() -> io::Result<()> {
+fn run_prompt() -> LoxResult<()> {
     loop {
         let mut out = io::stdout().lock();
         out.write_all(b"> ")?;
@@ -41,7 +41,7 @@ fn run_prompt() -> io::Result<()> {
                 _ => {
                     // dbg!("{}", input);
                     print!("{input}");
-                    run(input.as_str());
+                    run(input.as_str())?;
                 }
             },
             Err(err) => print!("{err}"),
@@ -50,11 +50,12 @@ fn run_prompt() -> io::Result<()> {
     Ok(())
 }
 
-fn run(source: &str) {
+fn run(source: &str) -> LoxResult<()> {
     let scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
 
     for token in tokens {
         println!("{}", token.lexeme);
     }
+    Ok(())
 }
