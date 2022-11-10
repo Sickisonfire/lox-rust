@@ -1,5 +1,6 @@
 use std::fmt;
 
+// TODO: refactor error handling to be more idiomatic
 pub type LoxResult<T> = std::result::Result<T, LoxError>;
 
 #[derive(Debug)]

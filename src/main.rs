@@ -57,7 +57,7 @@ fn run(source: &str) -> LoxResult<()> {
     let tokens = scanner.scan_tokens();
 
     for token in tokens {
-        println!("{}", token.lexeme);
+        println!("{}", token.to_string());
     }
     Ok(())
 }
