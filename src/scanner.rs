@@ -1,23 +1,17 @@
-use crate::{token::Token, token_type::TokenType};
+use crate::{error::LoxError, token::Token, token_type::TokenType};
 
-pub struct Scanner {
-    source: String,
-    tokens: Vec<Token>,
-    start: usize,
-    current: usize,
+pub struct Scanner<'a> {
+    source: &'a str,
+    tokens: Vec<Token<'a>>,
     line: usize,
-    done: bool,
 }
 
-impl Scanner {
+impl Scanner<'_> {
     pub fn new(source: &str) -> Scanner {
         Scanner {
-            source: source.to_string(),
+            source,
             tokens: vec![],
-            start: 0,
-            current: 0,
             line: 1,
-            done: false,
         }
     }
 
@@ -25,27 +19,36 @@ impl Scanner {
         // split source string into tokens
 
         let c = self.source.split("");
-        self.scan_token(c);
-
-        self.start = self.current;
+        for i in c {
+            self.scan_token(i);
+        }
 
         self.tokens
             .push(Token::new(TokenType::Eof, "", "OBJECT?", 2));
-        vec![]
+        self.tokens.clone()
     }
 
-    fn add_token(&self, token_type: TokenType, literal: String) {}
+    fn add_token(&self, token_type: TokenType, literal: &str) {}
 
-    fn scan_token<'a, I>(&self, mut source_iter: I)
-    where
-        I: Iterator<Item = &'a str>,
-    {
-        match source_iter.next() {
-            Some(c) => match c {
-                "(" => self.add_token(TokenType::LeftParen, "test".to_string()),
-                _ => self.add_token(TokenType::LeftParen, "test".to_string()),
-            },
-            None => (),
-        }
+    fn scan_token<'a>(&self, c: &str) {
+        match c {
+            "(" => self.add_token(TokenType::LeftParen, "test"),
+            ")" => self.add_token(TokenType::RightParen, "test"),
+            "{" => self.add_token(TokenType::LeftBrace, "test"),
+            "}" => self.add_token(TokenType::RightBrace, "test"),
+            "," => self.add_token(TokenType::Comma, "test"),
+            "." => self.add_token(TokenType::Dot, "test"),
+            "-" => self.add_token(TokenType::Minus, "test"),
+            "+" => self.add_token(TokenType::Plus, "test"),
+            ";" => self.add_token(TokenType::Semicolon, "test"),
+            "*" => self.add_token(TokenType::Star, "test"),
+            _ => eprintln!(
+                "{}",
+                LoxError::SyntaxError {
+                    line: self.line,
+                    message: "Unexpected character",
+                }
+            ),
+        };
     }
 }

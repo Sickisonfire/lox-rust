@@ -5,7 +5,7 @@ pub type LoxResult<T> = std::result::Result<T, LoxError>;
 
 #[derive(Debug)]
 pub enum LoxError {
-    SyntaxError { line: usize, message: String },
+    SyntaxError { line: usize, message: &'static str },
     IoError(std::io::Error),
 }
 

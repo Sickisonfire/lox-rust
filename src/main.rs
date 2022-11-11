@@ -14,8 +14,6 @@ use error::*;
 fn main() -> LoxResult<()> {
     let args: Vec<String> = env::args().skip(1).collect();
 
-    let mut had_error = false;
-
     match args.len() {
         0 => run_prompt().unwrap_or_else(|err| eprintln!("{}", err)),
         1 => run_file(&args[0]).unwrap_or_else(|err| eprintln!("{}", err)),
@@ -53,7 +51,7 @@ fn run_prompt() -> LoxResult<()> {
 }
 
 fn run(source: &str) -> LoxResult<()> {
-    let scanner = Scanner::new(source);
+    let mut scanner = Scanner::new(source);
     let tokens = scanner.scan_tokens();
 
     for token in tokens {

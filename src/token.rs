@@ -1,24 +1,25 @@
 use crate::token_type::TokenType;
 
-pub struct Token {
+#[derive(Clone, Copy)]
+pub struct Token<'a> {
     pub token_type: TokenType,
-    pub lexeme: String,
-    pub literal: String,
+    pub lexeme: &'a str,
+    pub literal: &'a str,
     pub line: usize,
 }
 
-impl Token {
-    pub fn new(token_type: TokenType, lexeme: &str, literal: &str, line: usize) -> Token {
+impl<'a> Token<'a> {
+    pub fn new(token_type: TokenType, lexeme: &'a str, literal: &str, line: usize) -> Token<'a> {
         Token {
             token_type,
-            lexeme: lexeme.to_string(),
-            literal: "TODO".to_string(),
+            lexeme,
+            literal: "TODO",
             line,
         }
     }
 }
 
-impl ToString for Token {
+impl ToString for Token<'_> {
     fn to_string(&self) -> String {
         // type + ' ' + lexeme + ' ' + literal
         format!("{:?} {} ", self.token_type, self.lexeme)
