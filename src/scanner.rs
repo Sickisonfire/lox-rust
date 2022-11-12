@@ -106,7 +106,7 @@ impl Scanner<'_> {
                     self.add_token(TokenType::Slash, "test");
                 };
             }
-
+            '"' => self.string(),
             ' ' | '\r' | '\t' => (),
             '\n' => self.line += 1,
             _ => {
@@ -129,4 +129,6 @@ impl Scanner<'_> {
 
         false
     }
+
+    fn string(&self) {}
 }
