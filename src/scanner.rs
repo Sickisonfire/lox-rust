@@ -1,4 +1,8 @@
-use crate::{error::LoxError, token::Token, token_type::TokenType};
+use crate::{
+    error::{LoxError, LoxResult},
+    token::Token,
+    token_type::TokenType,
+};
 
 pub struct Scanner<'a> {
     source: &'a str,
@@ -15,22 +19,22 @@ impl Scanner<'_> {
         }
     }
 
-    pub fn scan_tokens(&mut self) -> Vec<Token> {
+    pub fn scan_tokens(&mut self) -> LoxResult<Vec<Token>> {
         // split source string into tokens
 
         let chars_iter = self.source.chars();
         for i in chars_iter {
-            self.scan_token(i);
+            self.scan_token(i)?;
         }
 
         self.tokens
             .push(Token::new(TokenType::Eof, "", "OBJECT?", 2));
-        self.tokens.clone()
+        Ok(self.tokens.clone())
     }
 
     fn add_token(&self, token_type: TokenType, literal: &str) {}
 
-    fn scan_token<'a>(&self, c: char) {
+    fn scan_token<'a>(&self, c: char) -> LoxResult<()> {
         match c {
             '(' => self.add_token(TokenType::LeftParen, "test"),
             ')' => self.add_token(TokenType::RightParen, "test"),
@@ -42,13 +46,13 @@ impl Scanner<'_> {
             '+' => self.add_token(TokenType::Plus, "test"),
             ';' => self.add_token(TokenType::Semicolon, "test"),
             '*' => self.add_token(TokenType::Star, "test"),
-            _ => eprintln!(
-                "{}",
-                LoxError::SyntaxError {
+            _ => {
+                return Err(LoxError::SyntaxError {
                     line: self.line,
                     message: "Unexpected character",
-                }
-            ),
+                })
+            }
         };
+        Ok(())
     }
 }
