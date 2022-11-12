@@ -38,12 +38,9 @@ impl Lox {
     }
     fn run_file(&mut self, arg: &str) -> LoxResult<()> {
         self.run(fs::read_to_string(arg)?.as_str())?;
-<<<<<<< HEAD
-=======
         if self.had_error {
             std::process::exit(65);
         };
->>>>>>> db064f6 (feat: Lox struct and had_error)
         Ok(())
     }
     fn run_prompt(&mut self) -> LoxResult<()> {
@@ -59,10 +56,7 @@ impl Lox {
                     _ => {
                         // dbg!("{}", input);
                         self.run(input.as_str())?;
-<<<<<<< HEAD
-=======
                         self.had_error = false;
->>>>>>> db064f6 (feat: Lox struct and had_error)
                     }
                 },
                 Err(err) => print!("{err}"),
