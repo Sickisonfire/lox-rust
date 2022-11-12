@@ -19,17 +19,22 @@ impl Scanner<'_> {
         }
     }
 
-    pub fn scan_tokens(&mut self) -> LoxResult<Vec<Token>> {
+    pub fn scan_tokens(&mut self) -> LoxResult<(Vec<Token>, bool)> {
         // split source string into tokens
+        let mut had_error: bool = false;
 
         let chars_iter = self.source.chars();
         for i in chars_iter {
-            self.scan_token(i)?;
+            dbg!(i);
+            self.scan_token(i).unwrap_or_else(|err| {
+                eprintln!("{}", err);
+                had_error = true
+            });
         }
 
         self.tokens
             .push(Token::new(TokenType::Eof, "", "OBJECT?", 2));
-        Ok(self.tokens.clone())
+        Ok((self.tokens.clone(), had_error))
     }
 
     fn add_token(&self, token_type: TokenType, literal: &str) {}
