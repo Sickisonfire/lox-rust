@@ -40,7 +40,7 @@ impl Scanner<'_> {
     }
 
     fn add_token(&self, token_type: TokenType, literal: &str) {
-        //TODO:
+        println!("{}", literal);
     }
 
     fn scan_token<'a>(&mut self, c: char) -> LoxResult<()> {
@@ -106,7 +106,7 @@ impl Scanner<'_> {
                     self.add_token(TokenType::Slash, "test");
                 };
             }
-            '"' => self.string(),
+            '"' => self.string()?,
             ' ' | '\r' | '\t' => (),
             '\n' => self.line += 1,
             _ => {
@@ -120,8 +120,8 @@ impl Scanner<'_> {
     }
 
     fn match_next(&mut self, expected: char) -> bool {
-        if let Some(next) = self.chars_iter.peek() {
-            if *next == expected {
+        if let Some(&next) = self.chars_iter.peek() {
+            if next == expected {
                 self.chars_iter.next();
                 return true;
             };
@@ -130,5 +130,32 @@ impl Scanner<'_> {
         false
     }
 
-    fn string(&self) {}
+    fn string(&mut self) -> LoxResult<()> {
+        let mut string = String::new();
+        let mut end_string = false;
+
+        while let Some(_) = self.chars_iter.peek() {
+            let c = self.chars_iter.next().unwrap();
+            match c {
+                '"' => {
+                    end_string = true;
+                    break;
+                }
+                '\n' => {
+                    string.push(c);
+                    self.line += 1;
+                }
+                _ => string.push(c),
+            }
+        }
+        if end_string {
+            self.add_token(TokenType::String, &string);
+        } else {
+            return Err(LoxError::SyntaxError {
+                line: self.line,
+                message: "Unterminated string.",
+            });
+        }
+        Ok(())
+    }
 }
