@@ -129,8 +129,9 @@ impl Scanner<'_> {
                 };
             }
             '"' => self.string()?,
-            ' ' | '\r' | '\t' => (),
+            '0'..='9' => self.number()?,
             '\n' => self.line += 1,
+            ' ' | '\r' | '\t' => (),
             _ => {
                 return Err(LoxError::SyntaxError {
                     line: self.line,
@@ -182,5 +183,44 @@ impl Scanner<'_> {
             });
         }
         Ok(())
+    }
+
+    fn number(&mut self) -> LoxResult<()> {
+        while let Some(c) = self.chars_iter.peek() {
+            match c {
+                '0'..='9' => self.advance(),
+                '.' => {
+                    // TODO: Refactor
+                    if let Some(v) = self.peek_next() {
+                        if v.is_ascii_digit() {
+                            self.advance();
+                            if let Some(v2) = self.chars_iter.peek() {
+                                if v2.is_ascii_digit() {
+                                    self.advance();
+                                }
+                            }
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                _ => break,
+            };
+        }
+        let f = self.source[self.start..self.current].parse::<f64>();
+        match f {
+            Ok(num) => self.add_token_with_literal(TokenType::Number, Some(Literal::Num(num))),
+            Err(_) => {
+                return Err(LoxError::SyntaxError {
+                    line: self.line,
+                    message: "Not a valid Number",
+                });
+            }
+        };
+        Ok(())
+    }
+
+    fn peek_next(&self) -> Option<char> {
+        self.source.chars().nth(self.current + 1)
     }
 }
