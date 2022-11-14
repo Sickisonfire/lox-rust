@@ -72,8 +72,8 @@ impl Lox {
             self.had_error = true
         };
 
-        for token in tokens {
-            println!("{}", token.to_string());
+        for t in tokens {
+            println!("{}", t.to_string());
         }
         Ok(())
     }

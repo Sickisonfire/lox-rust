@@ -2,13 +2,15 @@ use std::{iter::Peekable, str::Chars};
 
 use crate::{
     error::{LoxError, LoxResult},
-    token::Token,
+    token::{Literal, Token},
     token_type::TokenType,
 };
 
 pub struct Scanner<'a> {
     source: &'a str,
-    tokens: Vec<Token<'a>>,
+    tokens: Vec<Token>,
+    start: usize,
+    current: usize,
     line: usize,
     chars_iter: Peekable<Chars<'a>>,
 }
@@ -18,9 +20,27 @@ impl Scanner<'_> {
         Scanner {
             source,
             tokens: vec![],
+            start: 0,
+            current: 0,
             line: 1,
             chars_iter: source.chars().peekable(),
         }
+    }
+    fn is_at_end(&self) -> bool {
+        self.current >= self.source.len()
+    }
+    fn advance(&mut self) {
+        self.chars_iter.next();
+        self.current += 1;
+    }
+
+    fn add_token(&mut self, token_type: TokenType) {
+        self.add_token_with_literal(token_type, None);
+    }
+    fn add_token_with_literal(&mut self, token_type: TokenType, literal: Option<Literal>) {
+        let lexeme = self.source[self.start..self.current].to_string();
+        let token = Token::new(token_type, lexeme, literal, self.line);
+        self.tokens.push(token);
     }
 
     pub fn scan_tokens(&mut self) -> LoxResult<(Vec<Token>, bool)> {
@@ -28,36 +48,38 @@ impl Scanner<'_> {
 
         while let Some(i) = self.chars_iter.next() {
             dbg!(i);
+            self.start = self.current;
             self.scan_token(i).unwrap_or_else(|err| {
                 eprintln!("{}", err);
                 had_error = true
             });
         }
 
-        self.tokens
-            .push(Token::new(TokenType::Eof, "", "OBJECT?", 2));
+        self.tokens.push(Token::new(
+            TokenType::Eof,
+            String::from(""),
+            None,
+            self.line,
+        ));
         Ok((self.tokens.clone(), had_error))
     }
 
-    fn add_token(&self, token_type: TokenType, literal: &str) {
-        println!("{}", literal);
-    }
-
     fn scan_token<'a>(&mut self, c: char) -> LoxResult<()> {
+        self.current += 1;
         match c {
             '(' => {
-                self.add_token(TokenType::LeftParen, "test");
+                self.add_token(TokenType::LeftParen);
                 self.match_next('=');
             }
-            ')' => self.add_token(TokenType::RightParen, "test"),
-            '{' => self.add_token(TokenType::LeftBrace, "test"),
-            '}' => self.add_token(TokenType::RightBrace, "test"),
-            ',' => self.add_token(TokenType::Comma, "test"),
-            '.' => self.add_token(TokenType::Dot, "test"),
-            '-' => self.add_token(TokenType::Minus, "test"),
-            '+' => self.add_token(TokenType::Plus, "test"),
-            ';' => self.add_token(TokenType::Semicolon, "test"),
-            '*' => self.add_token(TokenType::Star, "test"),
+            ')' => self.add_token(TokenType::RightParen),
+            '{' => self.add_token(TokenType::LeftBrace),
+            '}' => self.add_token(TokenType::RightBrace),
+            ',' => self.add_token(TokenType::Comma),
+            '.' => self.add_token(TokenType::Dot),
+            '-' => self.add_token(TokenType::Minus),
+            '+' => self.add_token(TokenType::Plus),
+            ';' => self.add_token(TokenType::Semicolon),
+            '*' => self.add_token(TokenType::Star),
             '!' => {
                 let token_type = if self.match_next('=') {
                     TokenType::Bangequal
@@ -65,7 +87,7 @@ impl Scanner<'_> {
                     TokenType::Bang
                 };
 
-                self.add_token(token_type, "test");
+                self.add_token(token_type);
             }
             '=' => {
                 let token_type = if self.match_next('=') {
@@ -74,7 +96,7 @@ impl Scanner<'_> {
                     TokenType::Equal
                 };
 
-                self.add_token(token_type, "test");
+                self.add_token(token_type);
             }
             '<' => {
                 let token_type = if self.match_next('=') {
@@ -83,7 +105,7 @@ impl Scanner<'_> {
                     TokenType::Less
                 };
 
-                self.add_token(token_type, "test");
+                self.add_token(token_type);
             }
             '>' => {
                 let token_type = if self.match_next('=') {
@@ -92,18 +114,18 @@ impl Scanner<'_> {
                     TokenType::Greater
                 };
 
-                self.add_token(token_type, "test");
+                self.add_token(token_type);
             }
             '/' => {
                 if self.match_next('/') {
                     while let Some(next) = self.chars_iter.peek() {
                         match next {
                             '\n' => break,
-                            _ => self.chars_iter.next(),
+                            _ => self.advance(),
                         };
                     }
                 } else {
-                    self.add_token(TokenType::Slash, "test");
+                    self.add_token(TokenType::Slash);
                 };
             }
             '"' => self.string()?,
@@ -122,7 +144,7 @@ impl Scanner<'_> {
     fn match_next(&mut self, expected: char) -> bool {
         if let Some(&next) = self.chars_iter.peek() {
             if next == expected {
-                self.chars_iter.next();
+                self.advance();
                 return true;
             };
         }
@@ -135,7 +157,9 @@ impl Scanner<'_> {
         let mut end_string = false;
 
         while let Some(_) = self.chars_iter.peek() {
+            // TODO refactor to use self.advance()
             let c = self.chars_iter.next().unwrap();
+            self.current += 1;
             match c {
                 '"' => {
                     end_string = true;
@@ -149,7 +173,8 @@ impl Scanner<'_> {
             }
         }
         if end_string {
-            self.add_token(TokenType::String, &string);
+            let literal = Literal::Str(string);
+            self.add_token_with_literal(TokenType::String, Some(literal));
         } else {
             return Err(LoxError::SyntaxError {
                 line: self.line,

@@ -1,20 +1,20 @@
 use crate::token_type::TokenType;
 
 #[derive(Clone, Debug)]
-pub struct Token<'a> {
+pub struct Token {
     pub token_type: TokenType,
-    pub lexeme: &'a str,
+    pub lexeme: String,
     pub literal: Option<Literal>,
     pub line: usize,
 }
 
-impl<'a> Token<'a> {
+impl Token {
     pub fn new(
         token_type: TokenType,
-        lexeme: &'a str,
+        lexeme: String,
         literal: Option<Literal>,
         line: usize,
-    ) -> Token<'a> {
+    ) -> Token {
         Token {
             token_type,
             lexeme,
@@ -24,7 +24,7 @@ impl<'a> Token<'a> {
     }
 }
 
-impl ToString for Token<'_> {
+impl ToString for Token {
     fn to_string(&self) -> String {
         // type + ' ' + lexeme + ' ' + literal
         format!(
