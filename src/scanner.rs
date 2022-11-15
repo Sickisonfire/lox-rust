@@ -132,6 +132,7 @@ impl Scanner<'_> {
             '0'..='9' => self.number()?,
             '\n' => self.line += 1,
             ' ' | '\r' | '\t' => (),
+            'a'..='z' | 'A'..='Z' | '_' => self.identifier(),
             _ => {
                 return Err(LoxError::SyntaxError {
                     line: self.line,
@@ -220,7 +221,42 @@ impl Scanner<'_> {
         Ok(())
     }
 
+    fn identifier(&mut self) {
+        while let Some(c) = self.chars_iter.peek() {
+            if c.is_ascii_alphanumeric() {
+                self.advance()
+            } else {
+                break;
+            }
+        }
+
+        let text = &self.source[self.start..self.current];
+
+        self.add_token(self.keyword(text).unwrap_or(TokenType::Identifier));
+    }
+
     fn peek_next(&self) -> Option<char> {
         self.source.chars().nth(self.current + 1)
+    }
+
+    fn keyword(&self, identifier: &str) -> Option<TokenType> {
+        match identifier {
+            "class" => Some(TokenType::Class),
+            "else" => Some(TokenType::Else),
+            "false" => Some(TokenType::False),
+            "for" => Some(TokenType::For),
+            "fun" => Some(TokenType::Fun),
+            "if" => Some(TokenType::If),
+            "nil" => Some(TokenType::Nil),
+            "or" => Some(TokenType::Or),
+            "print" => Some(TokenType::Print),
+            "return" => Some(TokenType::Return),
+            "super" => Some(TokenType::Super),
+            "this" => Some(TokenType::This),
+            "true" => Some(TokenType::True),
+            "var" => Some(TokenType::Var),
+            "while" => Some(TokenType::While),
+            _ => None,
+        }
     }
 }
