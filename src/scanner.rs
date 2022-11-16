@@ -249,6 +249,7 @@ impl Scanner<'_> {
             "if" => Some(TokenType::If),
             "nil" => Some(TokenType::Nil),
             "or" => Some(TokenType::Or),
+            "and" => Some(TokenType::And),
             "print" => Some(TokenType::Print),
             "return" => Some(TokenType::Return),
             "super" => Some(TokenType::Super),
