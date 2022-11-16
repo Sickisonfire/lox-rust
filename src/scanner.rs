@@ -26,9 +26,10 @@ impl Scanner<'_> {
             chars_iter: source.chars().peekable(),
         }
     }
-    fn is_at_end(&self) -> bool {
-        self.current >= self.source.len()
-    }
+    // not needed because of iterator
+    // fn is_at_end(&self) -> bool {
+    //     self.current >= self.source.len()
+    // }
     fn advance(&mut self) {
         self.chars_iter.next();
         self.current += 1;

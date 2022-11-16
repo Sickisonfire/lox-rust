@@ -50,7 +50,6 @@ impl ToString for Literal {
         match self {
             Literal::Str(x) => format!("{}  ", x),
             Literal::Num(x) => format!("{}  ", x),
-            _ => String::new(),
         }
     }
 }
