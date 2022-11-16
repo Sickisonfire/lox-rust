@@ -48,7 +48,6 @@ impl Scanner<'_> {
         let mut had_error: bool = false;
 
         while let Some(i) = self.chars_iter.next() {
-            dbg!(i);
             self.start = self.current;
             self.scan_token(i).unwrap_or_else(|err| {
                 eprintln!("{}", err);
@@ -65,7 +64,7 @@ impl Scanner<'_> {
         Ok((self.tokens.clone(), had_error))
     }
 
-    fn scan_token<'a>(&mut self, c: char) -> LoxResult<()> {
+    fn scan_token(&mut self, c: char) -> LoxResult<()> {
         self.current += 1;
         match c {
             '(' => {
