@@ -1,0 +1,6 @@
+// this is a test file
+var x = 5
+var y = "a string"
+if 2 + 3 == 5 {
+  print y 
+}
